@@ -1,47 +1,16 @@
-# Creating native functions
-
-The `00-Getting-Started` console application shows the final solution to the [Run native code with Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/agents/plugins/native-functions/using-the-skfunction-decorator) doc article.
-
 ## Prerequisites
 
 - [.NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) is required to run this sample.
 - Install the recommended extensions
 - [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
 - [Semantic Kernel Tools](https://marketplace.visualstudio.com/items?itemName=ms-semantic-kernel.semantic-kernel) (optional)
-
-## Prerequisites
-
-- [.NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) is required to run this sample.
-- Install the recommended extensions
-- [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
-- [Semantic Kernel Tools](https://marketplace.visualstudio.com/items?itemName=ms-semantic-kernel.semantic-kernel) (optional)
-
-## Configuring the sample
-
-The sample can be configured by using the command line with .NET [Secret Manager](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) to avoid the risk of leaking secrets into the repository, branches and pull requests.
-
-This sample has been tested with the following models:
-
-| Service      | Model type      | Model            | Model version | Supported |
-| ------------ | --------------- | ---------------- | ------------: | --------- |
-| OpenAI       | Text Completion | text-davinci-003 |             1 | ❌        |
-| OpenAI       | Chat Completion | gpt-3.5-turbo    |             1 | ❌        |
-| OpenAI       | Chat Completion | gpt-3.5-turbo    |          0301 | ❌        |
-| Azure OpenAI | Chat Completion | gpt-3.5-turbo    |          0613 | ✅        |
-| Azure OpenAI | Chat Completion | gpt-3.5-turbo    |          1106 | ✅        |
-| OpenAI       | Chat Completion | gpt-4            |             1 | ❌        |
-| OpenAI       | Chat Completion | gpt-4            |          0314 | ❌        |
-| Azure OpenAI | Chat Completion | gpt-4            |          0613 | ✅        |
-| Azure OpenAI | Chat Completion | gpt-4            |          1106 | ✅        |
-
-This sample uses function calling, so it only works on models newer than 0613.
 
 ### Using .NET [Secret Manager](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets)
 
 Configure an OpenAI endpoint
 
 ```powershell
-cd 00-Getting-Started
+cd RecommandationSystem
 
 dotnet user-secrets set "Global:LlmService" "OpenAI"
 
@@ -54,7 +23,7 @@ dotnet user-secrets set "OpenAI:OrgId" "... your ord ID ..."
 Configure an Azure OpenAI endpoint
 
 ```powershell
-cd 00-Getting-Started
+cd RecommandationSystem
 
 dotnet user-secrets set "Global:LlmService" "AzureOpenAI"
 
