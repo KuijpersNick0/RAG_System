@@ -5,10 +5,8 @@ namespace Plugins;
 
 public class ConnectorPlugin
 {
-    // Helper method to get the connectors for a specific step
-    [KernelFunction, Description("Lists of all the connector for each step of the process")]
-    [return: Description("A list of connectors that are possible to use based on the process step")]
-    public async Task<List<string>> getConnectorsStep(string step)
+    // Helper method to get the connectors for a specific step 
+    public List<string> getConnectorsStep(string step)
     {
         List<string> connectors = new List<string>();
 
@@ -113,5 +111,5 @@ public class ConnectorPlugin
         }
 
         return connectors;
-    }
+    }  
 }

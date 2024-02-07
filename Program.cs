@@ -28,9 +28,12 @@ namespace Smart_Sams
             builder.WithCompletionService();
             builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
 
+            // Helps with the history
             builder.Plugins.AddFromType<ConversationSummaryPlugin>();
+            // Plannerbehind the connectors functionnality calling
             builder.Plugins.AddFromType<ConnectorRecommender>();
-            builder.Plugins.AddFromType<ConnectorPlugin>();
+            
+            // builder.Plugins.AddFromType<ConnectorPlugin>();
 
             var kernel = builder.Build();
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
@@ -44,6 +47,9 @@ namespace Smart_Sams
 
             var memoryBuilder = DatabaseInitializer.InitializeMemory(endpoint, apiKey);
             var memory = memoryBuilder.Build();
+            
+            // var xmlPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V2/Sams.Documentation.xml"; 
+            // DatabaseInitializer.XMLParser(xmlPath);
 
             var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
