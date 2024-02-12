@@ -111,6 +111,8 @@ public class ConnectorRecommender
         (3) Ask[question], which asks the user a question and returns the answer.
         (4) Finish[answer], which returns the answer and finishes the task.
 
+        This are the exemples :
+        {exemples}
         
         """, new() {
             { "request", request },

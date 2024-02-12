@@ -20,10 +20,12 @@ using Microsoft.Extensions.Configuration;
   
 using System.Xml;
 
+using System.Text;
+
 namespace Smart_Sams
 {
     public class DatabaseInitializer
-    {
+    { 
         public static MemoryBuilder InitializeMemory(string endpoint, string apiKey)
         {
             var memoryBuilder = new MemoryBuilder();
@@ -36,62 +38,42 @@ namespace Smart_Sams
             // You can easily change the connector to db here
             var chromaMemoryStore = new ChromaMemoryStore("http://127.0.0.1:8000");
             memoryBuilder.WithMemoryStore(chromaMemoryStore);
+ 
 
             return memoryBuilder;
         }
 
-        // public static void XMLParser(string path)
+        // private async Task<string> SearchMemoriesAsync(Kernel kernel, MemoryBuilder memory, string query)
         // {
-        //     string xmlContent = path;  
+        //     StringBuilder result = new StringBuilder();
+        //     result.Append("The below is relevant information.\n[START INFO]");
+            
+        //     // Search for memories that are similar to the user's input.
+        //     const string memoryCollectionName = "Sams_Documentation_v2"; 
+            
+        //     IAsyncEnumerable<MemoryQueryResult> queryResults = 
+        //         memory.SearchAsync(memoryCollectionName, query, limit: 3, minRelevanceScore: 0.77);
 
-        //     XmlDocument xmlDoc = new XmlDocument();
-        //     xmlDoc.LoadXml(xmlContent);
-
-        //     // Extract information from Section[6]
-        //     // Should be more then Section[6] in the future, while loop over 6<i<10
-        //     XmlNode section6Node = xmlDoc.SelectSingleNode("/Document/Section[6]");
-        //     if (section6Node != null)
+        //     // For each memory found, try to get previous and next memories.
+        //     await foreach (MemoryQueryResult r in queryResults)
         //     {
-        //         // Extract connectors
-        //         XmlNodeList connectorNodes = section6Node.SelectNodes("./Table");
-        //         foreach (XmlNode connectorNode in connectorNodes)
-        //         {
-        //             // Extract connector name
-        //             string connectorName = connectorNode.SelectSingleNode("./Row[1]/C0/p/text()").InnerText;
-        //             Console.WriteLine($"Connector Name: {connectorName}");
+        //         int id = int.Parse(r.Metadata.Id);
+        //         MemoryQueryResult? rb2 = await kernel.Memory.GetAsync(memoryCollectionName, (id - 2).ToString());
+        //         MemoryQueryResult? rb = await kernel.Memory.GetAsync(memoryCollectionName, (id - 1).ToString());
+        //         MemoryQueryResult? ra = await kernel.Memory.GetAsync(memoryCollectionName, (id + 1).ToString());
+        //         MemoryQueryResult? ra2 = await kernel.Memory.GetAsync(memoryCollectionName, (id + 2).ToString());
 
-        //             // Extract connector description
-        //             string connectorDescription = connectorNode.SelectSingleNode("./Row[2]/C0/p/text()").InnerText;
-        //             Console.WriteLine($"Connector Description: {connectorDescription}");
-
-        //             // Extract information from Row[3]
-        //             ExtractInformationFromRow(connectorNode.SelectSingleNode("./Row[3]"));
-
-        //             // Extract information from Row[4]
-        //             ExtractInformationFromRow(connectorNode.SelectSingleNode("./Row[4]"));
-  
-        //         }
+        //         if (rb2 != null) result.Append("\n " + rb2.Metadata.Id + ": " + rb2.Metadata.Description + "\n");
+        //         if (rb != null) result.Append("\n " + rb.Metadata.Description + "\n");
+        //         if (r != null) result.Append("\n " + r.Metadata.Description + "\n");
+        //         if (ra != null) result.Append("\n " + ra.Metadata.Description + "\n");
+        //         if (ra2 != null) result.Append("\n " + ra2.Metadata.Id + ": " + ra2.Metadata.Description + "\n");
         //     }
-        // }
 
-        // static void ExtractInformationFromRow(XmlNode rowNode)
-        // {
-        //     // Extract information from C0 and C1
-        //     XmlNode c0Node = rowNode.SelectSingleNode("./C0");
-        //     string name = c0Node.SelectSingleNode("./p/text()").InnerText;
+        //     result.Append("\n[END INFO]");
+        //     result.Append($"\n{query}");
 
-        //     XmlNode c1Node = rowNode.SelectSingleNode("./C1");
-        //     string defaultValue = c1Node.SelectSingleNode("./p/text()").InnerText;
-
-        //     Console.WriteLine($"Name: {name}, Default Value: {defaultValue}");
-
-        //     // Extract information from C2 (if present)
-        //     XmlNode c2Node = rowNode.SelectSingleNode("./C2");
-        //     if (c2Node != null)
-        //     {
-        //         string additionalInfo = c2Node.SelectSingleNode("./p/text()").InnerText;
-        //         Console.WriteLine($"Additional Info: {additionalInfo}");
-        //     }
-        // }
+        //     return result.ToString();
+        // } 
     }
 }
