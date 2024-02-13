@@ -35,10 +35,17 @@ namespace Smart_Sams
             // Plannerbehind the connectors functionnality calling
             builder.Plugins.AddFromType<ConnectorRecommender>();
 
+            // Logging
+            var logFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
+            builder.Services.AddSingleton<ILoggerFactory>(logFactory);
+            builder.Services.AddSingleton(logFactory.CreateLogger<ConnectorRecommender>());
+
+
             // builder.Plugins.AddFromType<ConnectorPlugin>();
 
             var kernel = builder.Build();
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
 
             var memoryBuilder = DatabaseInitializer.InitializeMemory();
             var memory = memoryBuilder.Build();

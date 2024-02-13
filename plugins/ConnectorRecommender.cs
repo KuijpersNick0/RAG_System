@@ -11,6 +11,13 @@ namespace Plugins;
 // Later on, inherit from : IPlugin (create interface class for robusteness)
 public class ConnectorRecommender
 {
+    private readonly ILogger<ConnectorRecommender> _logger;
+    public ConnectorRecommender(ILogger<ConnectorRecommender> logger)
+    {
+        _logger = logger;
+    }
+
+
     [KernelFunction]
     [Description("Returns back the required steps necessary to recommand a connector")]
     [return: Description("The connector configuration parameters to use")]
@@ -32,6 +39,21 @@ public class ConnectorRecommender
         Observation 2: (Result 1 / 1) The Host, Port, Address, UserName, Password, Root, Selector parameters are known. 
         Thought 3: I know the configuration parameters variables values of the chosen connector.
         Action 3: Finish[Host: localhost, Port: 61616, Address: tcp://localhost:61616, UserName: admin, Password: admin, Root: /, Selector: None]";
+
+
+        // @"User > I choose Sams.EventListener.ActiveMQ.Consumer
+        // Assistant > I will now solve the final connector's configuration with interleaving Thought, Action, Observation steps:
+
+        // Thought 1: I need to search for information about Sams.EventListener.ActiveMQ.Consumer to find the required configuration parameters and recommend their values.
+        // Action 1: Search[Sams.EventListener.ActiveMQ.Consumer]
+        // Observation 1: Sams.EventListener.ActiveMQ.Consumer is an EventListener with 6 configuration parameters: Host, Port, Address, UserName, Password, Root, Selector.
+
+        // Thought 2: I lack information to fill in the configuration parameters.
+        // Action 2: Ask[configuration parameters]
+        // Observation 2: (Result 1 / 1) The parameters Host, Port, Address, UserName, Password, Root, Selector are known.
+
+        // Thought 3: I now know the configuration parameter values for the chosen connector.
+        // Action 3: Finish[Host: localhost, Port: 61616, Address: tcp://localhost:61616, UserName: admin, Password: admin, Root: /, Selector: None]";
 
         // var result = await kernel.InvokePromptAsync($"""
         // I need to recommand a connector based on this information {request} from the user but
@@ -63,7 +85,7 @@ public class ConnectorRecommender
 
         if (string.IsNullOrEmpty(processStep))
         {
-            return "Unable to determine the process step. Please provide a valid process step.";
+            Console.WriteLine("Unable to determine the process step. Please provide a valid process step.");
         }
 
         // 2. Instantiate ConnectorPlugin and Get Connectors
@@ -73,7 +95,7 @@ public class ConnectorRecommender
         // 3. Handle Connector List error
         if (connectorsResult == null || connectorsResult.Count == 0)
         {
-            return "No connectors available for the given process step.";
+            Console.WriteLine("No connectors available for the given process step.");
         }
 
         foreach (var connector in connectorsResult)
@@ -86,7 +108,7 @@ public class ConnectorRecommender
 
         if (string.IsNullOrEmpty(connectorPreference))
         {
-            return "Unable to determine the connector preferences. Please provide a valid connector preference.";
+            Console.WriteLine("Unable to determine the connector preferences. Please provide a valid connector preference.");
         }
 
         Console.WriteLine("Continuing with the connector: " + connectorPreference);
@@ -111,12 +133,17 @@ public class ConnectorRecommender
 
         This are the exemples :
         {exemples}
-        
+
         """, new() {
             { "request", request },
             {"exemples", exemples},
             { "context", databaseResultText}
         });
+
+        // Log the model's response
+        // This works
+        _logger.LogInformation("Model's response: {ModelResponse}", result);
+
 
         return result?.ToString();
     }
