@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI; 
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
@@ -17,7 +17,7 @@ using Plugins;
 using System.Linq;
 
 using Microsoft.Extensions.Configuration;
-  
+
 using System.Xml;
 
 using System.Text;
@@ -25,9 +25,16 @@ using System.Text;
 namespace Smart_Sams
 {
     public class DatabaseInitializer
-    { 
-        public static MemoryBuilder InitializeMemory(string endpoint, string apiKey)
+    {
+        public static MemoryBuilder InitializeMemory()
         {
+            var configuration = new ConfigurationBuilder()
+               .AddUserSecrets<DatabasePlugin>()
+               .Build();
+
+            var endpoint = configuration["AzureOpenAI:Endpoint"];
+            var apiKey = configuration["AzureOpenAI:ApiKey"];
+
             var memoryBuilder = new MemoryBuilder();
             memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(
                 "text-embedding-ada-002",
@@ -38,7 +45,7 @@ namespace Smart_Sams
             // You can easily change the connector to db here
             var chromaMemoryStore = new ChromaMemoryStore("http://127.0.0.1:8000");
             memoryBuilder.WithMemoryStore(chromaMemoryStore);
- 
+
 
             return memoryBuilder;
         }
@@ -47,10 +54,10 @@ namespace Smart_Sams
         // {
         //     StringBuilder result = new StringBuilder();
         //     result.Append("The below is relevant information.\n[START INFO]");
-            
+
         //     // Search for memories that are similar to the user's input.
         //     const string memoryCollectionName = "Sams_Documentation_v2"; 
-            
+
         //     IAsyncEnumerable<MemoryQueryResult> queryResults = 
         //         memory.SearchAsync(memoryCollectionName, query, limit: 3, minRelevanceScore: 0.77);
 

@@ -1,30 +1,23 @@
 using System.ComponentModel;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Planning.Handlebars;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Memory;
+using HandlebarsDotNet;
 
 // using Microsoft.SemanticKernel.Abstractions; 
 
 namespace Plugins;
 
 // Later on, inherit from : IPlugin (create interface class for robusteness)
-public class ConnectorRecommender 
+public class ConnectorRecommender
 {
-    private readonly ILogger _logger;
-
-    public ConnectorRecommender(ILoggerFactory loggerFactory)
-    {
-        this._logger = loggerFactory.CreateLogger<ConnectorRecommender>();
-    }
-
     [KernelFunction]
     [Description("Returns back the required steps necessary to recommand a connector")]
-    [return: Description("The connector configuration parameters to use")] 
+    [return: Description("The connector configuration parameters to use")]
     public async Task<string> SolveAsync(
         Kernel kernel,
         [Description("Request for a recommandation of a connector")] string request
-    ) 
+    )
     {
         var exemples =
         // Possibility to have examples in vector database ? Reduce token size. 
@@ -54,7 +47,7 @@ public class ConnectorRecommender
         // (3) Ask[question], which asks the user a question and returns the answer.
         // (4) Finish[answer], which returns the answer and finishes the task.
 
-        
+
         // """, new() {
         //     { "request", request },
         //     {"exemples", exemples} 
@@ -76,15 +69,14 @@ public class ConnectorRecommender
         // 2. Instantiate ConnectorPlugin and Get Connectors
         var connectorPlugin = new ConnectorPlugin();
         var connectorsResult = connectorPlugin.getConnectorsStep(processStep);
-        var connectors = connectorsResult;
 
         // 3. Handle Connector List error
-        if (connectors == null || connectors.Count == 0)
-        {    
+        if (connectorsResult == null || connectorsResult.Count == 0)
+        {
             return "No connectors available for the given process step.";
         }
 
-        foreach (var connector in connectors)
+        foreach (var connector in connectorsResult)
         {
             Console.WriteLine(connector);
         }
@@ -99,6 +91,10 @@ public class ConnectorRecommender
 
         Console.WriteLine("Continuing with the connector: " + connectorPreference);
 
+        // 5. Get context out of database linked to the chosen connector 
+        var databasePlugin = new DatabasePlugin();
+        var databaseResultText = await databasePlugin.getWithConnectorName(connectorPreference, kernel, "text");
+
         // 6. Make ReAct prompt to solve the final connector's configuration
         var result = await kernel.InvokePromptAsync($"""
         I need to recommand a connector based on this information {request} from the user but 
@@ -111,16 +107,17 @@ public class ConnectorRecommender
         (3) Ask[question], which asks the user a question and returns the answer.
         (4) Finish[answer], which returns the answer and finishes the task.
 
+        context : {databaseResultText}
+
         This are the exemples :
         {exemples}
         
         """, new() {
             { "request", request },
-            {"exemples", exemples} 
+            {"exemples", exemples},
+            { "context", databaseResultText}
         });
 
         return result?.ToString();
-
- 
     }
 }
