@@ -1,22 +1,35 @@
 using System.ComponentModel;
 using Microsoft.SemanticKernel;
+using classes;
 
 namespace Plugins;
 
 public class ConnectorPlugin
 {
-    // Helper method to get the connectors for a specific step 
-    public List<string> getConnectorsStep(string step)
+    private readonly IArtifactFactory artifactFactory;
+    private readonly List<IArtifact> createdConnectors;
+
+    public ConnectorPlugin(IArtifactFactory artifactFactory)
+    {
+        this.artifactFactory = artifactFactory;
+        this.createdConnectors = new List<IArtifact>();
+    }
+
+    [KernelFunction]
+    [Description("Returns a list of connectors possible to chose from based on which process step the user is in the process of the data broker tool")]
+    [return: Description("The list of available connectors")]
+    public Task<List<string>> GetConnectorsStep(
+        [Description("The process step at which the user is currently for configuring his data broker tool.")] string step)
     {
         List<string> connectors = new List<string>();
 
         // Add connectors based on the current step
         switch (step)
         {
-            case "EventListener":  
+            case "EventListener":
                 connectors.Add("Sams.EventListener.ActiveMQ.Consumer");
                 connectors.Add("Sams.EventListener.AQMessaging.Subscriber");
-                connectors.Add("Sams.EventListener.AMQP.Receiver"); 
+                connectors.Add("Sams.EventListener.AMQP.Receiver");
                 connectors.Add("Sams.EventListener.File.FileSystemWatcher");
                 connectors.Add("Sams.EventListener.HTTP.WebServer");
                 connectors.Add("Sams.EventListener.Irc.Receive");
@@ -110,6 +123,38 @@ public class ConnectorPlugin
                 break;
         }
 
-        return connectors;
-    }  
+        return Task.FromResult(connectors);
+    }
+
+    [KernelFunction]
+    [Description("Creates a new connector object")]
+    [return: Description("The list of created connector objects so far in the configuration process of the data broker tool")]
+    public Task<List<IArtifact>> CreateConnectorsObject(
+         [Description("The connector's parameters, ")] params object[] parameters
+        )
+    {
+        // Log or debug the parameters to understand what is being passed
+        Console.WriteLine($"Parameters: {string.Join(", ", parameters)}");
+        
+        IArtifact artifact = artifactFactory.CreateArtifact(parameters);
+ 
+        createdConnectors.Add(artifact);
+
+        return Task.FromResult(createdConnectors);
+    }
+
+    [KernelFunction]
+    [Description("Returns all the already created connectors configuration variables information")]
+    [return: Description("A list of information about the already created connectors configuration variables")]
+    public Task<List<string>> GetCreatedConnectorsConfigurationVariables()
+    {
+        List<string> connectorsConfigurationVariables = new List<string>();
+
+        foreach (var connector in createdConnectors)
+        {
+            connectorsConfigurationVariables.Add(string.Join(", ", connector.GetAllConfigurationVariables()));
+        }
+
+        return Task.FromResult(connectorsConfigurationVariables);
+    }
 }

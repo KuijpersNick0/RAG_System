@@ -13,6 +13,7 @@ using Microsoft.SemanticKernel.Connectors.Chroma;
 
 using Microsoft.SemanticKernel.Planning.Handlebars;
 using Plugins;
+using classes;
 
 using System.Linq;
 using Microsoft.Extensions.Configuration;
@@ -32,26 +33,32 @@ namespace Smart_Sams
 
             // Helps with the history : To summarize a conversation : less tokens
             builder.Plugins.AddFromType<ConversationSummaryPlugin>();
-            // Plannerbehind the connectors functionnality calling
-            builder.Plugins.AddFromType<ConnectorRecommender>();
+            // Helps with recommandation steps
+            // builder.Plugins.AddFromType<ConnectorRecommender>();  
+            // Helps with the memory   
+            builder.Plugins.AddFromType<DatabasePlugin>();
+            // Helps with the connectors functions and generation
+            builder.Plugins.AddFromType<ConnectorPlugin>();
 
             // Logging
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
             builder.Services.AddSingleton<ILoggerFactory>(logFactory);
             builder.Services.AddSingleton(logFactory.CreateLogger<ConnectorRecommender>());
-
-
-            // builder.Plugins.AddFromType<ConnectorPlugin>();
+            
+            var EventListenerFactory = new EventListenerFactory();
+            builder.Services.AddSingleton<IArtifactFactory>(EventListenerFactory);
 
             var kernel = builder.Build();
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-
+            // Initialize the memory with connection to the database
             var memoryBuilder = DatabaseInitializer.InitializeMemory();
             var memory = memoryBuilder.Build();
 
-            // var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
+            // Import the memory plugin to the kernel
+            var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
+            // Initialize the conversation manager
             var conversationManager = new ConversationManager(chatCompletionService, new ChatHistory(), kernel);
             await conversationManager.StartConversation();
         }

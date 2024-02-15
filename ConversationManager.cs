@@ -37,17 +37,6 @@ namespace Smart_Sams
             // For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
             // Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
 
-            var exemples =
-            @"  User > I choose Sams.EventListener.ActiveMQ.Consumer
-            Assistant > I will now solve the final connector's configuration with interleaving Thought, Action, Observation steps : 
-            Thought 1: I need to search Sams.EventListener.ActiveMQ.Consumer, find the configuration parameters that are needed, then recommand these parameters values.
-            Action 1: Search[Sams.EventListener.ActiveMQ.Consumer]
-            Observation 1: The Sams.EventListener.ActiveMQ.Consumer is an EventListerner that has 6 different configuration parameters : Host, Port, Address, UserName, Password, Root, Selector.
-            Thought 2: I don't have enough information to fill in the configuration parameters.
-            Action 2: Ask[configuration parameters]
-            Observation 2: (Result 1 / 1) The Host, Port, Address, UserName, Password, Root, Selector parameters are known. 
-            Thought 3: I know the configuration parameters variables values of the chosen connector.
-            Action 3: Finish[Host: localhost, Port: 61616, Address: tcp://localhost:61616, UserName: admin, Password: admin, Root: /, Selector: None]";
             ChatHistory chatMessages = new ChatHistory
             // ("""
             // You are a friendly assistant who likes to follow the rules. You will complete required steps
@@ -64,18 +53,16 @@ namespace Smart_Sams
 
 
             ("""
-                You are a serious engineer assistant who likes to follow the rules. You will help the user to configure the data broker tool. The data broker tool is
-                a tool that allows the user to connect to different data sources and destinations. It uses four steps to do this : EventListener, Source, Processor, Destination. 
-                At each one of these steps one or multiple connectors can be used. Each connector has a specific configuration.
-                You will need to recommand a connector based on the information from the user but 
-                you will solve the final connector's configuration with interleaving Thought, Action, Observation steps.
+                You are a serious assistant who likes to follow the rules. You will help the user to configure the data broker tool. The data broker tool 
+                allows the user to connect internal and external data sources through connectors. There are four steps in the data broker tool: EventListener, Source, Processor, Destination
+                that each require a connector or multiple connectors to configure.
+                You need to ask at which step the user is in the process of configuring the data broker tool and then provide a list of connectors that are possible to choose from based on the step.
+                Then help him configure the connector based on the information from the user. Here are a list of functions you can use to help the user:
+                (1) GetConnectorsStep : Returns a list of connectors possible to chose from based on which process step the user is in the process of the data broker tool.
+                (2) GetWithConnectorName : Returns the connector information based on the query and metadata field requested out of the memory.
+                (3) CreateConnectorsObject : Creates a connector object, this should be invoked after we have all the configuration parameters of the connector.
+                (4) GetCreatedConnectorsConfigurationVariables : Returns the list of connectors and their configuration parameters so far created.
 
-                Thought can reason about the current situation, and Action can be four types:
-                (1) Search[Entity], which searches the entity in the memory collection "Sams_Documentation" and returns the first text container if it exists. 
-                If not, it will return some similar entities to search.
-                (2) Lookup[keyword], which returns the next sentence containing keyword in the current passage.
-                (3) Ask[question], which asks the user a question and returns the answer.
-                (4) Finish[answer], which returns the answer and finishes the task.
             """);
 
 

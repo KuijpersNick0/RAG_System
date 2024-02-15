@@ -40,7 +40,13 @@ namespace Plugins
             memory = memoryBuilder.Build();
         }
 
-        public async Task<String> getWithConnectorName(string query, Kernel kernel, string metadataField = "text")
+        [KernelFunction]
+        [Description("Returns the connector information based on the query and metadata field requested out of the memory")]
+        [return: Description("The connector requested information")]
+        public async Task<String> GetWithConnectorName(
+            [Description("The connector that the user has asked to configure")] string query, 
+            Kernel kernel, 
+            [Description("The information that is needed out of the metadata to configure the connector")] string metadataField = "text")
         {
             var response = await memory.GetAsync(MemoryCollectionName, query, true, kernel);
 
@@ -74,8 +80,8 @@ namespace Plugins
             }
             return result;
         }
-
-        public async Task<String> getSemanticSearch(string query, Kernel kernel, string metadataField = "text")
+        
+        public async Task<String> GetSemanticSearch(string query, Kernel kernel, string metadataField = "text")
         {
             var response = memory.SearchAsync(MemoryCollectionName, query, limit: 1, minRelevanceScore: 0.1, true);
             string result = string.Empty;
