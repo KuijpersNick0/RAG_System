@@ -50,7 +50,7 @@ namespace Smart_Sams
             var memoryBuilder = DatabaseInitializer.InitializeMemory();
             var memory = memoryBuilder.Build();
 
-            var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
+            // var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
             var conversationManager = new ConversationManager(chatCompletionService, new ChatHistory(), kernel);
             await conversationManager.StartConversation();
