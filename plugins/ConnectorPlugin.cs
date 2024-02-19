@@ -12,18 +12,17 @@ public class ConnectorPlugin
     public ConnectorPlugin(IArtifactFactory artifactFactory)
     {
         this.artifactFactory = artifactFactory;
-        this.createdConnectors = new List<IArtifact>();
+        this.createdConnectors = new List<IArtifact>(); 
     }
 
     [KernelFunction]
     [Description("Returns a list of connectors possible to chose from based on which process step the user is in the process of the data broker tool")]
-    [return: Description("The list of available connectors")]
-    public Task<List<string>> GetConnectorsStep(
+    [return: Description("The list of all the available connectors at the specified process step of the data broker tool")]
+    public Task<List<string>> GetConnectorsStepList(
         [Description("The process step at which the user is currently for configuring his data broker tool.")] string step)
     {
         List<string> connectors = new List<string>();
-
-        // Add connectors based on the current step
+ 
         switch (step)
         {
             case "EventListener":
@@ -128,33 +127,79 @@ public class ConnectorPlugin
 
     [KernelFunction]
     [Description("Creates a new connector object")]
-    [return: Description("The list of created connector objects so far in the configuration process of the data broker tool")]
-    public Task<List<IArtifact>> CreateConnectorsObject(
-         [Description("The connector's parameters, ")] params object[] parameters
+    [return: Description("The created connector object")]
+    public Task<IArtifact > CreateConnectorObject(
+        //  [Description("The connector's parameters")] params object[] parameters
+        [Description("The full name of the connector.")] string fullName, 
+        [Description("A unique id for the connector, you can start at 1.")] string id,
+        [Description("The description of the connector.")] string description,
+        [Description("The Assembly Information of the connector.")] string assemblyInformation,
+        [Description("The text in JSON format containing all of the information of the connector but without the Configuration parameters that are not needed.")] string text
         )
-    {
-        // Log or debug the parameters to understand what is being passed
-        Console.WriteLine($"Parameters: {string.Join(", ", parameters)}");
-        
-        IArtifact artifact = artifactFactory.CreateArtifact(parameters);
- 
-        createdConnectors.Add(artifact);
+    {   
+        text = text.Trim();
+        text = text.Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace(" ", ""); 
+        var connectorParser = new ConnectorParser();
+        var (properties, attributes, configuration) = connectorParser.GenerateDictionaries(text);
 
-        return Task.FromResult(createdConnectors);
+        IArtifact connector = artifactFactory.CreateArtifact(
+        fullName, id, description, assemblyInformation, properties, attributes, configuration);
+
+        createdConnectors.Add(connector);
+
+        return Task.FromResult(connector);
     }
 
+
+
     [KernelFunction]
-    [Description("Returns all the already created connectors configuration variables information")]
-    [return: Description("A list of information about the already created connectors configuration variables")]
+    [Description("Returns all the already created connectors Configuration variables information")]
+    [return: Description("A list of information about the already created connectors Configuration variables")]
     public Task<List<string>> GetCreatedConnectorsConfigurationVariables()
     {
         List<string> connectorsConfigurationVariables = new List<string>();
 
         foreach (var connector in createdConnectors)
         {
-            connectorsConfigurationVariables.Add(string.Join(", ", connector.GetAllConfigurationVariables()));
+            connectorsConfigurationVariables.Add(connector.GetAllConfigurationVariables());
         }
 
         return Task.FromResult(connectorsConfigurationVariables);
+    }
+
+    [KernelFunction]
+    [Description("Returns all the already created connectors information")]
+    [return: Description("A list of information about the already created connectors")] 
+    public Task<List<string>> GetCreatedConnectorsInformation()
+    {
+        List<string> connectorsInformation = new List<string>();
+
+        foreach (var connector in createdConnectors)
+        {
+            connectorsInformation.Add(connector.GetAllInformation());
+        }
+
+        return Task.FromResult(connectorsInformation);
+    }
+
+    [KernelFunction]
+    [Description("Changes the configuration parameter value of a connector")]
+    [return: Description("The updated connector object")]
+    public Task<IArtifact> ChangeConnectorConfiguration( 
+        [Description("Id of the connector.")] int connectorId,
+        [Description("The configuration parameters to change.")] string parameter,
+        [Description("The new value of the configuration parameter.")] string newValue
+        )
+    {
+        var connector = createdConnectors.FirstOrDefault(c => c.Id == connectorId);
+        if (connector != null)
+        {
+            if (connector.Configuration.ContainsKey(parameter))
+            {
+                connector.Configuration[parameter].Value = newValue;
+            }
+        }
+
+        return Task.FromResult(connector);
     }
 }

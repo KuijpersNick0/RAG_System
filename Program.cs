@@ -33,17 +33,19 @@ namespace Smart_Sams
 
             // Helps with the history : To summarize a conversation : less tokens
             builder.Plugins.AddFromType<ConversationSummaryPlugin>();
-            // Helps with recommandation steps
+            // Helps with recommandation steps : Didn't use this as giving too much liberty to the LLM will make it hallucinate or give wrong recommandations
             // builder.Plugins.AddFromType<ConnectorRecommender>();  
             // Helps with the memory   
             builder.Plugins.AddFromType<DatabasePlugin>();
             // Helps with the connectors functions and generation
             builder.Plugins.AddFromType<ConnectorPlugin>();
+            // Helps the LLM ask a explicit question to the user, makes the LLM buggy, I don't know why : choses himself the connectors out of list
+            // builder.Plugins.AddFromType<BasePlugin>();
 
             // Logging
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
             builder.Services.AddSingleton<ILoggerFactory>(logFactory);
-            builder.Services.AddSingleton(logFactory.CreateLogger<ConnectorRecommender>());
+            builder.Services.AddSingleton(logFactory.CreateLogger<ConnectorPlugin>());
             
             var EventListenerFactory = new EventListenerFactory();
             builder.Services.AddSingleton<IArtifactFactory>(EventListenerFactory);
@@ -55,8 +57,8 @@ namespace Smart_Sams
             var memoryBuilder = DatabaseInitializer.InitializeMemory();
             var memory = memoryBuilder.Build();
 
-            // Import the memory plugin to the kernel
-            var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
+            // Import the memory plugin to the kernel -> He uses it when not needed (for the moment I don't give it access to the memory by default)
+            // var memoryPlugin = kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
             // Initialize the conversation manager
             var conversationManager = new ConversationManager(chatCompletionService, new ChatHistory(), kernel);

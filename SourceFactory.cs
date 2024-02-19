@@ -2,15 +2,17 @@ namespace classes
 {
     public class SourceFactory : IArtifactFactory
     {
-        public IArtifact CreateArtifact(params object[] parameters)
+        public IArtifact CreateArtifact(string fullName, string id, string description, string assemblyInformation, Dictionary<string, string> properties, Dictionary<string, AttributeInfo> attributes, Dictionary<string, ConfigurationInfo> configuration)
         {
-            if (parameters.Length != 2){
-                throw new ArgumentException("Incorrect number of parameters for SourceListener creation");
-            }
-            return new SourceListener
+            return new Source
             {
-                FullName = (string)parameters[0],
-                Id = int.Parse((string)parameters[1]) 
+                FullName = fullName,
+                Id = int.Parse(id), 
+                Description = description,
+                AssemblyInformations = assemblyInformation,
+                Properties = properties ?? new Dictionary<string, string>(),
+                Attributes = attributes ?? new Dictionary<string, AttributeInfo>(),
+                Configuration = configuration ?? new Dictionary<string, ConfigurationInfo>()
             };
         }
     }
