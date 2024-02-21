@@ -1,0 +1,35 @@
+You need to transform the connectors information into a XML output. The XML has a specific structure.
+The XML structure looks like this:
+<ProcessStepName Id="IdOfTheConnectorHere" FullName="FullName of the connector here" AttributeParameterHere="AttributeValueHere" AnotherAttributeParameters="OtherAttributeValues">
+    <Configuration>
+        <add key="ConfigurationParameter" value="ConfigurationValue"/>
+        <add key="AnotherConfigurationParameter" value="ConfigurationValue"/>
+        <add key="AnotherConfigurationParameter" value="ConfigurationValue"/>
+    </Configuration>
+</ProcessStepName>
+
+This is the connectors information : {{$text}}
+Here are a few short examples of previous XML configurations : 
+<EventListener Id="1" FullName="Sams.EventListener.ActiveMQ.Consumer" UseAsSourceConnector="false" WaitLatecomerEventTimer="1000">
+    <Configuration>
+        <add key="Host" value="localhost"/>
+        <add key="Port" value="61616"/>
+        <add key="Address" value="SamsQHome"/> 
+    </Configuration>
+</EventListener>
+,
+<EventListener Id="1" FullName="Sams.EventListener.Scheduler.QuartzScheduler" UseAsSourceConnector="false" WaitLatecomerEventTimer="1000">
+    <Configuration>
+        <add key="CronExpression" value="47-49 * *"/> 
+    </Configuration>
+</EventListener>
+,
+<Processor Id="1" FullName="Sams.Processor.Database.Execute">
+    <Configuration>
+        <add key="DatabaseProvider" value="Oracle.Database"/>
+        <add key="ConnectionString" value="myHost"/> 
+    </Configuration>
+</Processor>
+
+
+

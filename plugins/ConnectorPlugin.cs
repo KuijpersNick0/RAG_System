@@ -26,6 +26,7 @@ public class ConnectorPlugin
         switch (step)
         {
             case "EventListener":
+                connectors.Add("_"); // Adding this because for an unkown reason it sometimes proceeds with the first element without asking the user.
                 connectors.Add("Sams.EventListener.ActiveMQ.Consumer");
                 connectors.Add("Sams.EventListener.AQMessaging.Subscriber");
                 connectors.Add("Sams.EventListener.AMQP.Receiver");
@@ -43,6 +44,7 @@ public class ConnectorPlugin
                 connectors.Add("Sams.EventListener.Wcf.SimpleService");
                 break;
             case "Source":
+                connectors.Add("_");
                 connectors.Add("Sams.Connector.Database.Source.Select");
                 connectors.Add("Sams.Connector.Database.Source.SelectDb2");
                 connectors.Add("Sams.Connector.Database.Source.SelectPG");
@@ -66,6 +68,7 @@ public class ConnectorPlugin
                 connectors.Add("Sams.Connector.Windows.Source.Wmi");
                 break;
             case "Processor":
+                connectors.Add("_");
                 connectors.Add("Sams.Processor.Database.Execute");
                 connectors.Add("Sams.Processor.Database.Select");
                 connectors.Add("Sams.Processor.File.Filter");
@@ -82,6 +85,7 @@ public class ConnectorPlugin
                 connectors.Add("Sams.Processor.Xml.Xsl");
                 break;
             case "Destination":
+                connectors.Add("_");
                 connectors.Add("Sams.Connector.ActiveMQ.Destination.Publisher");
                 connectors.Add("Sams.Connector.AMQP.Destination.Sender");
                 connectors.Add("Sams.Connector.Database.Destination.Action");
@@ -134,11 +138,11 @@ public class ConnectorPlugin
         [Description("A unique id for the connector, you can start at 1.")] string id,
         [Description("The description of the connector.")] string description,
         [Description("The Assembly Information of the connector.")] string assemblyInformation,
-        [Description("The text in JSON format containing all of the information of the connector but without the Configuration parameters that are not needed.")] string text
+        [Description("The text in JSON format containing the information of the connector without the Configuration parameters that the user did not configure.")] string text
         )
     {   
         text = text.Trim();
-        text = text.Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace(" ", ""); 
+        text = text.Replace("\n", " ").Replace("\r", "").Replace("\t", " "); 
         var connectorParser = new ConnectorParser();
         var (properties, attributes, configuration) = connectorParser.GenerateDictionaries(text);
 
@@ -149,8 +153,6 @@ public class ConnectorPlugin
 
         return Task.FromResult(connector);
     }
-
-
 
     [KernelFunction]
     [Description("Returns all the already created connectors Configuration variables information")]
@@ -182,13 +184,33 @@ public class ConnectorPlugin
         return Task.FromResult(connectorsInformation);
     }
 
+    // [KernelFunction]
+    // [Description("Changes a configuration parameter value of a connector")]
+    // [return: Description("The updated connector object")]
+    // public Task<IArtifact> ChangeConnectorConfiguration( 
+    //     [Description("Id of the connector.")] int connectorId,
+    //     [Description("The configuration parameters to change.")] string parameter,
+    //     [Description("The new value of the configuration parameter.")] string newValue
+    //     )
+    // {
+    //     var connector = createdConnectors.FirstOrDefault(c => c.Id == connectorId);
+    //     if (connector != null)
+    //     {
+    //         if (connector.Configuration.ContainsKey(parameter))
+    //         {
+    //             connector.Configuration[parameter].Value = newValue;
+    //         }
+    //     }
+
+    //     return Task.FromResult(connector ?? throw new ArgumentNullException(nameof(connector)));
+    // }
+
     [KernelFunction]
-    [Description("Changes the configuration parameter value of a connector")]
+    [Description("Deletes a configuration parameter of a connector that the user doesn't need")]
     [return: Description("The updated connector object")]
-    public Task<IArtifact> ChangeConnectorConfiguration( 
+    public Task<IArtifact> DeleteConnectorConfiguration( 
         [Description("Id of the connector.")] int connectorId,
-        [Description("The configuration parameters to change.")] string parameter,
-        [Description("The new value of the configuration parameter.")] string newValue
+        [Description("The configuration parameters to delete.")] string parameter
         )
     {
         var connector = createdConnectors.FirstOrDefault(c => c.Id == connectorId);
@@ -196,10 +218,54 @@ public class ConnectorPlugin
         {
             if (connector.Configuration.ContainsKey(parameter))
             {
-                connector.Configuration[parameter].Value = newValue;
+                connector.Configuration.Remove(parameter);
             }
         }
 
-        return Task.FromResult(connector);
+        return Task.FromResult(connector ?? throw new ArgumentNullException(nameof(connector)));
+    }
+
+    [KernelFunction]
+    [Description("Adds or changes a configuration parameter of a connector that the user needs")]
+    [return: Description("The updated connector object")]
+    public Task<IArtifact> AddConnectorConfiguration( 
+        [Description("Id of the connector.")] int connectorId,
+        [Description("The configuration parameters to add.")] string parameter,
+        [Description("The description of the parameter to add.")] string parameterDescription,
+        [Description("The value of the configuration parameter to add.")] string value
+        )
+    {
+        var connector = createdConnectors.FirstOrDefault(c => c.Id == connectorId);
+        if (connector != null)
+        {
+            if (!connector.Configuration.ContainsKey(parameter))
+            {
+                connector.Configuration.Add(parameter, new ConfigurationInfo { Description = parameterDescription, Value = value });
+            } else {
+                connector.Configuration[parameter].Value = value;
+            }
+        }
+        return Task.FromResult(connector ?? throw new ArgumentNullException(nameof(connector)));
+    }
+
+    [KernelFunction]
+    [Description("Returns the XML code of the connector to be inserted in the data broker tool.")]
+    [return: Description("The XML code of the connector in string format.")]
+    public async Task<FunctionResult> GetXmlConnector(
+        [Description("The connector's Id.")] int Id,
+        Kernel kernel
+        )
+    {
+        var connector = createdConnectors.FirstOrDefault(c => c.Id == Id);
+        var text = connector?.GetAllInformation();
+        
+        // Generate the XML file  
+        var XmlGenerationFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts"; 
+        var xmlGenerationFunction = kernel.ImportPluginFromPromptDirectory(XmlGenerationFunctionPath);
+
+        var arguments = new KernelArguments() { ["text"] = text };
+
+        var result = await kernel.InvokeAsync(xmlGenerationFunction["XmlGeneration"], arguments);
+        return result;
     }
 }

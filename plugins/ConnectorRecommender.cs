@@ -2,8 +2,11 @@ using System.ComponentModel;
 using Microsoft.SemanticKernel;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Memory;
+using Microsoft.SemanticKernel.ChatCompletion;
+
 using HandlebarsDotNet;
 using classes;
+
 
 namespace Plugins;
 
@@ -105,6 +108,6 @@ public class ConnectorRecommender
         _logger.LogInformation("Model's response: {ModelResponse}", result);
 
 
-        return result?.ToString();
+        return result.ToString();
     }
 }

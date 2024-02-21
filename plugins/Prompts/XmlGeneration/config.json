@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Creates a xml file from a json object.",
+    "execution_settings": {
+        "default": {
+            "max_tokens": 5000,
+            "temperature": 0
+        },
+        "gpt-3.5-turbo": {
+            "model_id": "gpt-3.5-turbo-0613",
+            "max_tokens": 5000,
+            "temperature": 0.1
+        }
+    },
+    "input_variables": [ 
+        {
+            "name": "text",
+            "description": "The text describing the connector.",
+            "required": true
+        }  
+    ]
+}
