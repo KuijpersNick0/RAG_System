@@ -1,0 +1,34 @@
+You need to change the input in correct JSON format and only keep the Configuration parameters and values the users wants.
+A Configuration parameter is shown in the exemple as Config1 and Config2. The user can have as many as he wants. Their values are shown as Config1Value and Config2Value.
+The JSON output format should look like this :
+{
+    ""FullName"": ""ArtifactName"",
+    ""Description"": ""Artifact Description"",
+    ""AssemblyInformations"": ""Assembly Information"",
+    ""Properties"": {
+        ""Property1"": ""Value1"",
+        ""Property2"": ""Value2""
+    },
+    ""Attributes"": {
+        ""Attribute1"": {
+            ""AttributeName"": ""Attribute1Name"",
+            ""AttributeValue"": ""Attribute1Value""
+        },
+        ""Attribute2"": {
+            ""AttributeName"": ""Attribute2Name"",
+            ""AttributeValue"": ""Attribute2Value""
+        }
+    },
+    ""Configuration"": {
+        ""Config1"": {
+            ""ConfigName"": ""Config1Name"",
+            ""ConfigValue"": ""Config1Value""
+        },
+        ""Config2"": {
+            ""ConfigName"": ""Config2Name"",
+            ""ConfigValue"": ""Config2Value""
+        }
+    }
+}
+This are the Configuration parameters and values the user wants to keep : {{$wantedConfigurationParameters}}
+This is the input : {{$input}}

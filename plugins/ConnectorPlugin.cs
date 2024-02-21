@@ -128,21 +128,69 @@ public class ConnectorPlugin
 
         return Task.FromResult(connectors);
     }
+    
+    // ---------------------------------------------------
+    // With more context window this is more precise.
+    // ---------------------------------------------------
+    // [KernelFunction]
+    // [Description("Creates the Properties, Attributes, and Configuration dictionaries of the connector to be used later for creating the connector object.")]
+    // [return: Description("The Properties, Attributes, and Configuration dictionaries of the connector.")]
+    // public async Task<(Dictionary<string, string> properties, Dictionary<string, AttributeInfo> attributes, Dictionary<string, ConfigurationInfo> configuration)> CreateConnectorDictionaries(
+    //     Kernel kernel,
+    //     [Description("All the information describing the connector.")] string text,
+    //     [Description("The Configuration Parameters and their values the user wants to keep.")] string wantedConfigurationParameters
+    // )
+    // {
+    //     var JSONFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts/Formater";
+    //     var JSONFunction = kernel.ImportPluginFromPromptDirectory(JSONFunctionPath);
+    //     var arguments = new KernelArguments() { ["input"] = text, ["wantedConfigurationParameters"] = wantedConfigurationParameters};
+    //     var result = await kernel.InvokeAsync(JSONFunction["JsonFormatter"], arguments);
+        
+    //     var connectorParser = new ConnectorParser();
+    //     var (properties, attributes, configuration) = connectorParser.GenerateDictionaries(result.ToString());
+
+    //     return (properties, attributes, configuration);
+    // }
+ 
+    // [KernelFunction]
+    // [Description("Creates a new connector object")]
+    // [return: Description("The created connector object")]
+    // public Task<IArtifact > CreateConnectorObject(
+    //     Kernel kernel,
+    //     [Description("The full name of the connector.")] string fullName, 
+    //     [Description("A unique id for the connector, you can start at 1.")] string id,
+    //     [Description("The description of the connector.")] string description,
+    //     [Description("The Assembly Information of the connector.")] string assemblyInformation,
+    //     [Description("the Properties dictionary of the connector.")] Dictionary<string, string> properties,
+    //     [Description("the Attributes dictionary of the connector.")] Dictionary<string, AttributeInfo> attributes,
+    //     [Description("the Configuration dictionary of the connector.")] Dictionary<string, ConfigurationInfo> configuration
+    //     )
+    // {    
+    //     IArtifact connector = artifactFactory.CreateArtifact(
+    //     fullName, id, description, assemblyInformation, properties, attributes, configuration);
+
+    //     createdConnectors.Add(connector);
+
+    //     return Task.FromResult(connector);
+    // }
+    
+    // --------------------------------------------------- --------------------------------------------------------------------
 
     [KernelFunction]
     [Description("Creates a new connector object")]
     [return: Description("The created connector object")]
     public Task<IArtifact > CreateConnectorObject(
-        //  [Description("The connector's parameters")] params object[] parameters
+        Kernel kernel,
         [Description("The full name of the connector.")] string fullName, 
         [Description("A unique id for the connector, you can start at 1.")] string id,
         [Description("The description of the connector.")] string description,
         [Description("The Assembly Information of the connector.")] string assemblyInformation,
-        [Description("The text in JSON format containing the information of the connector without the Configuration parameters that the user did not configure.")] string text
+        [Description("The information in JSON string format describing the connector but without the Configuration Parameters the user doesn't need.")] string text
         )
     {   
-        text = text.Trim();
-        text = text.Replace("\n", " ").Replace("\r", "").Replace("\t", " "); 
+        // text = text.Trim();
+        // text = text.Replace("\n", " ").Replace("\r", "").Replace("\t", " "); 
+
         var connectorParser = new ConnectorParser();
         var (properties, attributes, configuration) = connectorParser.GenerateDictionaries(text);
 
@@ -260,7 +308,7 @@ public class ConnectorPlugin
         var text = connector?.GetAllInformation();
         
         // Generate the XML file  
-        var XmlGenerationFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts"; 
+        var XmlGenerationFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts/Generator"; 
         var xmlGenerationFunction = kernel.ImportPluginFromPromptDirectory(XmlGenerationFunctionPath);
 
         var arguments = new KernelArguments() { ["text"] = text };

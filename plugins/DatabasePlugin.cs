@@ -42,7 +42,7 @@ namespace Plugins
 
         [KernelFunction]
         [Description("Returns the connector information based on the query and metadata field requested out of the memory")]
-        [return: Description("The connector requested information")]
+        [return: Description("The connector information")]
         public async Task<String> GetWithConnectorName(
             [Description("The connector that the user has asked to configure")] string query, 
             Kernel kernel, 

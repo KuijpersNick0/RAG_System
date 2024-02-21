@@ -1,27 +1,27 @@
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace classes 
 { 
     public class ConnectorParser
-    {
-
-        public EventListener ParseConnectorInfo(string text)
+    { 
+        private JObject ParseConnectorInfo(string text)
         { 
             // Parse JSON text into EventListener object 
-            var eventListener = JsonConvert.DeserializeObject<EventListener>(text);
-            return eventListener ?? throw new Exception("Failed to deserialize JSON into EventListener object.");
+            var connector = JsonConvert.DeserializeObject<JObject>(text);
+            return connector ?? throw new Exception("Failed to deserialize JSON into Connector object.");
         }
 
         public (Dictionary<string, string>, Dictionary<string, AttributeInfo>, Dictionary<string, ConfigurationInfo>) GenerateDictionaries(string text)
         {
             var connectorInfo = ParseConnectorInfo(text);
-
-            return (
-                connectorInfo.Properties ?? new Dictionary<string, string>(),
-                connectorInfo.Attributes ?? new Dictionary<string, AttributeInfo>(),
-                connectorInfo.Configuration ?? new Dictionary<string, ConfigurationInfo>()
-            );
+ 
+            var properties = connectorInfo["Properties"]?.ToObject<Dictionary<string, string>>() ?? new Dictionary<string, string>();
+            var attributes = connectorInfo["Attributes"]?.ToObject<Dictionary<string, AttributeInfo>>() ?? new Dictionary<string, AttributeInfo>();
+            var configuration = connectorInfo["Configuration"]?.ToObject<Dictionary<string, ConfigurationInfo>>() ?? new Dictionary<string, ConfigurationInfo>();
+            
+            return (properties, attributes, configuration);
         }
     }
 }
