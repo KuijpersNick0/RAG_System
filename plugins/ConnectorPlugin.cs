@@ -179,7 +179,7 @@ public class ConnectorPlugin
     [KernelFunction]
     [Description("Creates a new connector object")]
     [return: Description("The created connector object")]
-    public Task<IArtifact > CreateConnectorObject(
+    public Task<IArtifact> CreateConnectorObject(
         Kernel kernel,
         [Description("The full name of the connector.")] string fullName, 
         [Description("A unique id for the connector, you can start at 1.")] string id,
@@ -188,8 +188,8 @@ public class ConnectorPlugin
         [Description("The information in JSON string format describing the connector but without the Configuration Parameters the user doesn't need.")] string text
         )
     {   
-        // text = text.Trim();
-        // text = text.Replace("\n", " ").Replace("\r", "").Replace("\t", " "); 
+        text = text.Trim();
+        text = text.Replace("\n", " ").Replace("\r", "").Replace("\t", " "); 
 
         var connectorParser = new ConnectorParser();
         var (properties, attributes, configuration) = connectorParser.GenerateDictionaries(text);
@@ -296,24 +296,24 @@ public class ConnectorPlugin
         return Task.FromResult(connector ?? throw new ArgumentNullException(nameof(connector)));
     }
 
-    [KernelFunction]
-    [Description("Returns the XML code of the connector to be inserted in the data broker tool.")]
-    [return: Description("The XML code of the connector in string format.")]
-    public async Task<FunctionResult> GetXmlConnector(
-        [Description("The connector's Id.")] int Id,
-        Kernel kernel
-        )
-    {
-        var connector = createdConnectors.FirstOrDefault(c => c.Id == Id);
-        var text = connector?.GetAllInformation();
+    // [KernelFunction]
+    // [Description("Returns the XML code of the connector to be inserted in the data broker tool.")]
+    // [return: Description("The XML code of the connector in string format.")]
+    // public async Task<FunctionResult> GetXmlConnector(
+    //     [Description("The connector's Id.")] int Id,
+    //     Kernel kernel
+    //     )
+    // {
+    //     var connector = createdConnectors.FirstOrDefault(c => c.Id == Id);
+    //     var text = connector?.GetAllInformation();
         
-        // Generate the XML file  
-        var XmlGenerationFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts/Generator"; 
-        var xmlGenerationFunction = kernel.ImportPluginFromPromptDirectory(XmlGenerationFunctionPath);
+    //     // Generate the XML file  
+    //     var XmlGenerationFunctionPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts/Generator"; 
+    //     var xmlGenerationFunction = kernel.ImportPluginFromPromptDirectory(XmlGenerationFunctionPath);
 
-        var arguments = new KernelArguments() { ["text"] = text };
+    //     var arguments = new KernelArguments() { ["text"] = text };
 
-        var result = await kernel.InvokeAsync(xmlGenerationFunction["XmlGeneration"], arguments);
-        return result;
-    }
+    //     var result = await kernel.InvokeAsync(xmlGenerationFunction["XmlGeneration"], arguments);
+    //     return result;
+    // }
 }

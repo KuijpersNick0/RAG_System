@@ -28,8 +28,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks; 
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.SemanticKernel.Plugins.Document;
+using Microsoft.Extensions.Logging.Abstractions; 
 
 namespace Smart_Sams
 {
@@ -52,22 +51,17 @@ namespace Smart_Sams
             builder.Plugins.AddFromType<ConnectorPlugin>();
             // Helps the LLM ask a explicit question to the user, makes the LLM buggy, I don't know why : choses himself the connectors out of list
             // builder.Plugins.AddFromType<BasePlugin>();
-            
-
 
             // Logging
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
             builder.Services.AddSingleton<ILoggerFactory>(logFactory);
             builder.Services.AddSingleton(logFactory.CreateLogger<ConnectorPlugin>());
             
+            // Need to add Factory as a singleton to the kernel
             var EventListenerFactory = new EventListenerFactory();
             builder.Services.AddSingleton<IArtifactFactory>(EventListenerFactory);
 
             var kernel = builder.Build();
-
-            // // Generate the XML file when needed
-            // var XmlGenerationPluginPath = "C:/Users/z000p01m/Documents/Stage/code/RAG_System_V3/RecommandationSystem/plugins/Prompts/XmlGeneration"; 
-            // kernel.ImportPluginFromPromptDirectory(XmlGenerationPluginPath);
              
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
             

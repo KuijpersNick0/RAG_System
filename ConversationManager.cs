@@ -86,7 +86,7 @@ namespace Smart_Sams
                 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
                 {
                     // Set the temperature to 0.5 to make the assistant's responses more conservative [0-1], 1 being the most random (default)
-                    Temperature = 0.5 , 
+                    Temperature = 0.5, 
                     ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
                 };
 

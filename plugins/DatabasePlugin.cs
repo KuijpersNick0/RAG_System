@@ -30,7 +30,7 @@ namespace Plugins
 {
     public class DatabasePlugin
     {
-        private readonly string MemoryCollectionName = "Sams_Documentation";
+        private readonly string MemoryCollectionName = "Sams_Documentation_V3";
         private readonly ISemanticTextMemory memory;
 
         public DatabasePlugin()
@@ -55,7 +55,7 @@ namespace Plugins
             if (response != null && response.Embedding.HasValue)
             {
                 // Convert the Span to an array
-                var embeddingArray = response.Embedding.Value.ToArray();
+                // var embeddingArray = response.Embedding.Value.ToArray();
 
                 // Assuming there's text information in the metadata, print the specified field
                 if (response.Metadata != null)
@@ -67,6 +67,9 @@ namespace Plugins
                             break;
                         case "description":
                             result = $"Description: {response.Metadata.Description}";
+                            break;
+                        case "xml":
+                            result = $"XML: {response.Metadata.AdditionalMetadata}";
                             break;
                         default:
                             Console.WriteLine($"Unknown metadata field: {metadataField}, please add to the plugin DatabasePlugin.cs");
@@ -80,8 +83,14 @@ namespace Plugins
             }
             return result;
         }
-        
-        public async Task<String> GetSemanticSearch(string query, Kernel kernel, string metadataField = "text")
+         
+        [Description("Returns information based on a semantic search through the database")]
+        [return: Description("The information related to the semantic search")]
+        public async Task<String> GetSemanticSearch(
+            Kernel kernel,
+            [Description("The connector that the user has asked to configure")] string query,  
+            [Description("The information that is needed out of the metadata to configure the connector")] string metadataField = "text"
+            )
         {
             var response = memory.SearchAsync(MemoryCollectionName, query, limit: 1, minRelevanceScore: 0.1, true);
             string result = string.Empty;
@@ -103,6 +112,6 @@ namespace Plugins
                 }
             }
             return result;
-        }
+        } 
     }
 }

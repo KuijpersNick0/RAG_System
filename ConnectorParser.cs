@@ -8,7 +8,7 @@ namespace classes
     { 
         private JObject ParseConnectorInfo(string text)
         { 
-            // Parse JSON text into EventListener object 
+            // Parse JSON text into JObject, to be handled into Connector object afterwards
             var connector = JsonConvert.DeserializeObject<JObject>(text);
             return connector ?? throw new Exception("Failed to deserialize JSON into Connector object.");
         }
